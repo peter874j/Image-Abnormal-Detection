@@ -39,7 +39,7 @@
 <script language="javascript">
 
     var rec = [];
-    var zone = ["Placement", "Jig", "Work_Rack", "Finish"];
+    var zone = ["Placement", "Jig", "Work", "Finish"];
     var text;
     var startPoint;
     var endPoint;
@@ -234,15 +234,11 @@
         })
     }
 
-    function padLeft(str, len) {
-        str = '' + str;
-        return str.length >= len ? str : new Array(len - str.length + 1).join("0") + str;
-}
     // 寫入變動內容到console
     function write_console(transformType) {
 
         var today = new Date();
-        time = today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate() + ' ' + padLeft(today.getHours(), 2) + ':' + padLeft(today.getMinutes(), 2) + ':' + padLeft(today.getSeconds() ,2) + ' ';
+        time = today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate() + ' ' + today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds() + ' ';
 
         console = document.getElementById("console")
         switch (transformType) {
@@ -294,7 +290,7 @@
         write_console("actionStart")
 
         rec.length = 0
-        zone = ["Placement", "Jig", "Work_Rack", "Finish"];
+        zone = ["Placement", "Jig", "Work", "Finish"];
         setup_form()
         clear_form()
         var canvas1 = document.getElementById("myCanvas1");

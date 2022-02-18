@@ -1,0 +1,132 @@
+<meta charset="utf-8" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<html lang="en">
+
+
+<html>
+
+<style>
+    .wrap {
+        /* width: 100px; */
+        text-align: left;
+        line-height: 50px;
+        float: left;
+    }
+
+    .command {
+        background: pink;
+        height: 300px;
+        text-align: center;
+        line-height: 50px;
+        float: left;
+    }
+
+    .cam1 {
+        background: pink;
+        height: 300px;
+        text-align: center;
+        line-height: 50px;
+        /* float: left; */
+    }
+
+    .temp {
+        display: flex;
+        align-content: center;
+    }
+
+    .cam2 {
+        background: pink;
+        height: 300px;
+        text-align: center;
+        line-height: 50px;
+        float: right;
+    }
+
+    .motionResult-style {
+        background-color: gray;
+        height: 30%;
+        width: 30%;
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+<script>
+
+    function motionDetection_result() {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: "/motionDetection_result",
+            success: function (result) {
+                if (result['step_result'] == "NO" || result['step_result'] == "YES") {
+                    var stepConsole = document.getElementById(`Step_result${result['step_num']}`);
+                    stepConsole.innerHTML = stepConsole.innerHTML + " " + result['step_result'];
+                }
+            },
+            error: function (result) {
+                swal("Error", { button: "OK!" });
+            }
+        })
+    }
+
+    window.setInterval(function () {
+        var myImageElement = document.getElementById('cameraFeed');
+        var timestamp = new Date().getTime()
+        var newUrl = "{{ url_for('video_feed_0') }}" + '?_=' + timestamp;
+        myImageElement.src = newUrl;
+        motionDetection_result()
+    }, 10);
+
+    window.setInterval(function () { // load the data from your endpoint into the div
+        $("#now_time").load("/now_time.txt")
+    }, 1000)
+
+</script>
+
+<head>
+    <title>Stream</title>
+</head>
+
+<body>
+
+    <!-- 子頁面跳轉 -->
+    <div class="wrap">
+        <form action="/sec_page" method="get">
+            <h5><input type="submit" value="Configure" style="font-size:30px" /></h5>
+        </form>
+        <h1>
+            <div class="Header">景碩初版UI數計</div>
+        </h1>
+    </div>
+
+    <!--  右方主鏡頭 
+    <div class="cam2">
+        <h1>Video Stream 2</h1>
+        <img src="{{ url_for('video_feed_1') }}"> 
+    </div>  -->
+
+    <div class='temp'>
+        <!-- 左方主鏡頭 -->
+        <div class="cam1">
+            <h1>Video Stream 1</h1>
+            <img id="cameraFeed" src="{{ url_for('video_feed_0') }}">
+        </div>
+
+        <!-- 動作流程檢測結果 -->
+        <div class='motionResult-style'>
+            <h1>動作流程狀態</h1>
+            <p id="Step_result1" style="font-size:50px;">Step 1. Work_Rack to Jig</p>
+            <p id="Step_result2" style="font-size:50px;">Step 2. Jig to Finish</p>
+            <p id="Step_result3" style="font-size:50px;">Step 3. Placement to Jig</p>
+            <p id="Step_result4" style="font-size:50px;">Step 4. Jig to Work_Rack</p>
+        </div>
+    </div>
+
+    <!-- 時間顯示 -->
+    <div id="now_time" style="position: absolute; right:900; top:900;
+    font-size:62px;background-color:#FF4500;">
+        <h1>{{ user_time }} </h1>
+    </div>
+
+</body>
+
+</html>

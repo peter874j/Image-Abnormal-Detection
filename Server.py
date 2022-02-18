@@ -15,7 +15,7 @@ from AIModule.detect import AbnormalModel
 Logger.config(
     logTypes=LogType.Console | LogType.File,
     consoleLogConfig=ConsoleLogConfig(
-        level=LogLevel.INFO,
+        level=LogLevel.WARNING,
         ),
     fileLogConfig=FileLogConfig(
         level=LogLevel.INFO,
