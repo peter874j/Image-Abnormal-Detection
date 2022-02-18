@@ -5,9 +5,8 @@ from Logger import *
 from datetime import datetime
 import time
 import cv2
-import io
-from PIL import Image
-from Config import DrawingFrame, ServiceConfig, ConfigType
+import copy
+from Config import Frame, ServiceConfig, ConfigType
 from AIModule.SystemDetection import Motion, Hands
 from AIModule.detect import AbnormalModel
 
@@ -27,10 +26,13 @@ Logger.config(
 
 app = Flask(__name__)
 
+def InitGlbVar():
+    global currentMotionFrame
+
 ### 主頁面進入點
 @app.route("/", methods=['GET'])
 def entrypoint():
-    camera0.run() # thread 1
+    Frame.initialize_label()
     return render_template("index.html", user_time=system_time_info())
 
 ### 跳轉子頁面
@@ -59,26 +61,43 @@ def system_time_info():
 ### 回傳動作流程camera的frame
 @app.route("/video_feed_0")
 def video_feed_0():
-    frame = drawingFrame.get_motion_frame(camera0)
-    frame = cv2.imencode('.png', frame)[1].tobytes()
-    frame = (b'--frame\r\n'b'Content-Type: image/png\r\n\r\n' + frame + b'\r\n')
-    return Response(frame, mimetype="multipart/x-mixed-replace; boundary=frame")
+	global currentMotionFrame
+	currentMotionFrame = camera0.get_motion_frame()
+	frame = copy.deepcopy(currentMotionFrame)
+	Frame.draw_rectangle_in_zone(frame) # 畫作業區框框
+	frame = Frame.encode(frame)
+	return Response(frame, mimetype="multipart/x-mixed-replace; boundary=frame")
 
 ### 第1個camera的串流含式(手部)
 @app.route("/video_feed_1")
 def video_feed_1():
-    frame = drawingFrame.get_hands_frame(camera1)
+    frame = camera1.get_hands_frame()
     frame = handsDetection.run(frame)
-    frame = cv2.imencode('.png', frame)[1].tobytes()
-    frame = (b'--frame\r\n'b'Content-Type: image/png\r\n\r\n' + frame + b'\r\n')
+    frame = Frame.encode(frame)
     return Response(frame, mimetype="multipart/x-mixed-replace; boundary=frame")
+
+### 跳子頁面要傳當前圖片
+@app.route("/currentFrame", methods=['GET'])
+def get_currentFrame():
+	global currentMotionFrame
+	frame = copy.deepcopy(currentMotionFrame)
+	file_object = Frame.transform_virtual_file(frame)
+	return send_file(file_object, mimetype='image/PNG')
+### 前端(子頁面)的透視變換
+@app.route("/perspective_transformation", methods=['GET', 'POST'])
+def perspective_transformation():
+    coordinates = ServiceConfig.get_4_coordinate()
+    image = cv2.imread("static/test1.jpg")
+    warpedImg = perspective_transform(image, coordinates)
+    file_object = Frame.transform_virtual_file(warpedImg)
+    return send_file(file_object, mimetype='image/PNG')
+
 
 ### 取得動作狀態的函數，給前端使用(前端會一直呼叫這個函數)
 @app.route("/motion_result", methods=['POST'])
 def motion_result():
     if request.method == "POST":
-        frame = drawingFrame.get_motion_frame(camera0)
-        isAnomalyStep, numOfCurrentStep = motionDetection.run(frame)
+        isAnomalyStep, numOfCurrentStep = motionDetection.run(currentMotionFrame)
         return json.dumps({'step_result':isAnomalyStep, 'step_num':numOfCurrentStep})
 
 ### 作業區矩形座標寫入txt
@@ -141,26 +160,13 @@ def read_hand_config():
     else:
         return "OK"
 
-### 前端(子頁面)的透視變換
-@app.route("/perspective_transformation", methods=['GET', 'POST'])
-def perspective_transformation():
 
-    coordinates = ServiceConfig.get_4_coordinate()
-    image = cv2.imread("static/test1.jpg")
-    warpedImg = perspective_transform(image, coordinates)
-    warpedImg = cv2.cvtColor(warpedImg, cv2.COLOR_BGR2RGB)
-    warpedImg = Image.fromarray(warpedImg.astype('uint8'))
-    
-    file_object = io.BytesIO()
-    warpedImg.save(file_object, 'PNG')
-    file_object.seek(0)
-
-    return send_file(file_object, mimetype='image/PNG')
 
 
 if __name__=="__main__":
 
     ### set parameter
+    InitGlbVar()
     motionWeight = r'weights/motion_yolov5s.pt'
     handsWeight = r'weights/hands_yolov5s.pt'
     motionSource = r'motion.avi'
@@ -180,13 +186,11 @@ if __name__=="__main__":
 
     ### 初始化兩個camera
     camera0 = Camera(video_source=motionSource)
-    # camera0.run() # thread 1
+    camera0.run() # thread 1
     Logger.info(f"Loading Camera0 from {motionSource}")
     camera1 = Camera(video_source=handsSource)
     camera1.run() # thread 2
     Logger.info(f"Loading Camera1 from {handsSource}")
-    drawingFrame = DrawingFrame()
-    
     ### Build Web Server
     Logger.info("Starting Web Server...")
     app.run(host=host, port=port)

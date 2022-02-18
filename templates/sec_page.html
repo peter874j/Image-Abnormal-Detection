@@ -39,7 +39,7 @@
 <script language="javascript">
 
     var rec = [];
-    var zone = ["Placement", "Jig", "Work", "Finish"];
+    var zone = ["Placement", "Jig", "Work_Rack", "Finish"];
     var text;
     var startPoint;
     var endPoint;
@@ -47,6 +47,7 @@
     var recWidth;
     var recHeight;
     var totalPoints = [];
+    var motionImg;
 
     class consoleType {
         static actionStart = "Motion Label Setting Reset Successfully!"
@@ -88,10 +89,10 @@
     function clear_rectangle(c, w, h) {
         c.clearRect(0, 0, w, h);
     }
-    function setup_image(ctx, imgPath) {
-        image = new Image()
-        image.src = imgPath
-        ctx.drawImage(image, 0, 0, w, h);
+    function setup_image(ctx, img) {
+        w = img.width
+        h = img.height
+        ctx.drawImage(img, 0, 0, w, h);
     }
     function draw_fixRectangle() {
         var canvas1 = document.getElementById("myCanvas1");
@@ -119,19 +120,16 @@
         var canvas2 = document.getElementById("myCanvas2");
         var ctx1 = canvas1.getContext("2d");
         var ctx2 = canvas2.getContext("2d");
-        image1 = new Image()
-        image2 = new Image()
-        image1.src = "static/test.jpg"
-        image2.src = "static/test1.jpg"
-        w = image1.width
-        h = image1.height
+
+        motionImg = document.getElementById('imgs1')
+        w = motionImg.width
+        h = motionImg.height
         canvas1.width = w
         canvas1.height = h
         canvas2.width = w
         canvas2.height = h
 
-        var bgImg1 = document.getElementById('imgs1')
-        ctx1.drawImage(bgImg1, 0, 0, w, h);
+        ctx1.drawImage(motionImg, 0, 0, w, h);
         draw_defaultRecangle();
 
         var bgImg2 = document.getElementById('imgs2')
@@ -234,11 +232,15 @@
         })
     }
 
+    function padLeft(str, len) {
+        str = '' + str;
+        return str.length >= len ? str : new Array(len - str.length + 1).join("0") + str;
+}
     // 寫入變動內容到console
     function write_console(transformType) {
 
         var today = new Date();
-        time = today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate() + ' ' + today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds() + ' ';
+        time = today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate() + ' ' + padLeft(today.getHours(), 2) + ':' + padLeft(today.getMinutes(), 2) + ':' + padLeft(today.getSeconds() ,2) + ' ';
 
         console = document.getElementById("console")
         switch (transformType) {
@@ -290,13 +292,13 @@
         write_console("actionStart")
 
         rec.length = 0
-        zone = ["Placement", "Jig", "Work", "Finish"];
+        zone = ["Placement", "Jig", "Work_Rack", "Finish"];
         setup_form()
         clear_form()
         var canvas1 = document.getElementById("myCanvas1");
         var ctx1 = canvas1.getContext("2d");
         clear_rectangle(ctx1, canvas1.width, canvas1.height)
-        setup_image(ctx1, "/static/test.jpg")
+        setup_image(ctx1, motionImg)
         canvas1.addEventListener('mousedown', start_darw, false);
     }
     function start_darw(e) {
@@ -324,7 +326,7 @@
             var ctx1 = canvas1.getContext("2d");
             var canvasBox = canvas1.getBoundingClientRect();
             clear_rectangle(ctx1, canvas1.width, canvas1.height)
-            setup_image(ctx1, "/static/test.jpg")
+            setup_image(ctx1, motionImg)
             draw_fixRectangle()
 
             // draw_tempRectangle()
@@ -340,7 +342,7 @@
         var canvas1 = document.getElementById("myCanvas1");
         var ctx1 = canvas1.getContext("2d");
         var canvasBox = canvas1.getBoundingClientRect();
-        setup_image(ctx1, "/static/test.jpg")
+        setup_image(ctx1, motionImg)
         endPoint = new Point(event.pageX - canvasBox.left, event.pageY - canvasBox.top)
         centerPoint = new Point(Math.round((startPoint.x + endPoint.x) / 2), Math.round((startPoint.y + endPoint.y) / 2))
         recWidth = endPoint.x - startPoint.x
@@ -514,8 +516,7 @@
         <div class='component'>
             <h1>動作流程偵測設定</h1>
             <canvas id="myCanvas1"></canvas>
-            <img src="/static/test.jpg" id="imgs1" style="display:none"></img>
-            <!-- <img src="{{url_for('static', filename='test.jpg')}}" style="width:60%"> -->
+            <img src="/currentFrame" id="imgs1" style="display:none"></img>
             <span>
                 <input type="button" value="Reset" style="width:200px;height:60px;font-size:40px;"
                     onclick="start_action_label()">

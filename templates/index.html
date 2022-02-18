@@ -8,7 +8,7 @@
 	<script src="static/js/jquery.min.js"></script>
 	<script src="static/js/echarts.min.js"></script>
 
-	
+
 
 </head>
 <body>
@@ -102,10 +102,52 @@
 		},500,function(){  
 			$(this).css({marginTop : "0px"}).find("li:first").appendTo(this);  
 		})  
-	}  
+	}
 	$(function(){  
 		setInterval('autoScroll(".maquee")',2000);
 	}) 
+    function motion_result() {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: "/motion_result",
+            success: function (result) {
+                for (var i = 0; i < result['step_num'].length; i++) {
+                    if (result['step_result'][i] == "NO") {
+                        var stepConsole = document.getElementById(`Step_result${result['step_num'][i]}`);
+                        stepConsole.style = "color:green;font-size:50px;"
+                    }
+                    if (result['step_result'][i] == "YES") {
+                        var stepConsole = document.getElementById(`Step_result${result['step_num'][i]}`);
+                        stepConsole.style = "color:red;font-size:50px;"
+                    }
+
+                    if (result['step_num'] == '0') {
+                        var stepEnd = document.getElementById('end');
+                        stepEnd.style.display = "none"
+                    }
+                    if (result['step_num'] == '1') {
+                        var stepStart = document.getElementById('start');
+                        stepStart.style.display = "block"
+                    }
+                    if (result['step_num'] == '4') {
+                        for (var i = 1; i <= 4; i++) {
+                            var stepConsole = document.getElementById(`Step_result${i}`);
+                            stepConsole.style = "color:black;font-size:50px;"
+                        }
+                        var stepEnd = document.getElementById('end');
+                        stepEnd.style.display = "block"
+                        var stepStart = document.getElementById('start');
+                        stepStart.style.display = "none"
+                    }
+                }
+            },
+            error: function (result) {
+                swal("Error", { button: "OK!" });
+            }
+        })
+    }
+
 	function set_console() {
 		$.ajax({
 			type: "POST",
@@ -128,14 +170,28 @@
 	$(function(){  
 	setInterval(set_console());
 		})
-		
-	window.setInterval(function () {
+
+    // for motions
+    window.setInterval(function () {
         var myImageElement = document.getElementById('cameraFeed');
         var timestamp = new Date().getTime()
         var newUrl = "{{ url_for('video_feed_0') }}" + '?_=' + timestamp;
         myImageElement.src = newUrl;
-        //motionDetection_result()
+        motion_result()
     }, 150);
-</script> 
+
+    // // for hands
+    window.setInterval(function () {
+        var myImageElement = document.getElementById('cameraHands');
+        var timestamp = new Date().getTime()
+        var newUrl = "{{ url_for('video_feed_1') }}" + '?_=' + timestamp;
+        myImageElement.src = newUrl;
+    }, 100);
+
+    window.setInterval(function () { // load the data from your endpoint into the div
+        $("#now_time").load("/now_time.txt")
+    }, 1000)
+
+</script>
 </body>
 </html>
