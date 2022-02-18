@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="en">
+
+<style>
+    .flex-container {
+        display: flex;
+        align-content: center;
+        /* transform: translate(0, 50%); */
+
+        /* flex-direction: row;
+        text-align: center;
+        align-content: space-around;
+        transform: translate(0, 50%); */
+    }
+
+    .component {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        line-height: 100px;
+    }
+
+    .button_component {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .form_position {
+        position: fixed;
+        z-index: 99999;
+        display: none;
+    }
+</style>
+
+<script type=text/javascript>
+    var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+
+<script language="javascript">
+
+    var rec = [];
+    var zone = ["Placement", "Jig", "Work_Rack", "Finish"];
+    var text;
+    var startPoint;
+    var endPoint;
+    var centerPoint;
+    var recWidth;
+    var recHeight;
+    var totalPoints = [];
+
+    class consoleType {
+        static actionStart = "Motion Label Setting Reset Successfully!"
+        static handStart = "Hands View Calibration Setting Reset Successfully!"
+        static actionOK = "Motion Label Setting Save Successfully!"
+        static handOK = "Hands View Calibration Setting Save Successfully!"
+    }
+
+    class Rectangle {
+        constructor(name, startPoint, endPoint, centerPoint, recWidth, recHeight) {
+            this.name = name
+            this.startPoint = startPoint
+            this.endPoint = endPoint
+            this.centerPoint = centerPoint
+            this.recWidth = recWidth;
+            this.recHeight = recHeight;
+        }
+    }
+
+    class Point {
+        constructor(x, y) {
+            this.x = x
+            this.y = y
+        }
+    }
+
+    function clear_form() {
+        const zoneSelect = document.querySelector(".form_position");
+        zoneSelect.style.display = "none";
+    }
+    function setup_form() {
+        var zoneSelect = document.getElementById("form_list");
+        var inner = "";
+        for (var i = 0; i < zone.length; i++) {
+            inner = inner + '<option value=+i+>' + zone[i] + '</option>';
+        }
+        zoneSelect.innerHTML = inner;
+    }
+    function clear_rectangle(c, w, h) {
+        c.clearRect(0, 0, w, h);
+    }
+    function setup_image(ctx, imgPath) {
+        image = new Image()
+        image.src = imgPath
+        ctx.drawImage(image, 0, 0, w, h);
+    }
+    function draw_fixRectangle() {
+        var canvas1 = document.getElementById("myCanvas1");
+        var ctx1 = canvas1.getContext("2d");
+        ctx1.beginPath();
+        ctx1.lineWidth = "3";
+        ctx1.strokeStyle = "blue";
+        for (var i = 0; i < rec.length; i++) {
+            // Label
+            ctx1.fillStyle = "black";
+            ctx1.fillRect(rec[i].startPoint.x - 10, rec[i].startPoint.y - 20, 100, 30);
+            ctx1.font = "15px sans-serif"
+            ctx1.fillStyle = "white";
+            ctx1.fillText(rec[i].name, rec[i].startPoint.x, rec[i].startPoint.y - 5)
+
+            // 畫矩形
+            ctx1.rect(rec[i].startPoint.x, rec[i].startPoint.y, rec[i].recWidth, rec[i].recHeight);
+        }
+        ctx1.stroke();
+    }
+
+    window.onload = function () {
+
+        var canvas1 = document.getElementById("myCanvas1");
+        var canvas2 = document.getElementById("myCanvas2");
+        var ctx1 = canvas1.getContext("2d");
+        var ctx2 = canvas2.getContext("2d");
+        image1 = new Image()
+        image2 = new Image()
+        image1.src = "static/test.jpg"
+        image2.src = "static/test1.jpg"
+        w = image1.width
+        h = image1.height
+        canvas1.width = w
+        canvas1.height = h
+        canvas2.width = w
+        canvas2.height = h
+
+        var bgImg1 = document.getElementById('imgs1')
+        ctx1.drawImage(bgImg1, 0, 0, w, h);
+        draw_defaultRecangle();
+
+        var bgImg2 = document.getElementById('imgs2')
+        ctx2.drawImage(bgImg2, 0, 0, w, h);
+        draw_defaultPoint();
+
+        setup_form()
+        set_console()
+    };
+
+    function draw_defaultPoint() {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: "/read_hand_config",
+            success: function (result) {
+
+                var canvas2 = document.getElementById("myCanvas2");
+                var ctx2 = canvas2.getContext("2d");
+
+                // 畫圓
+                for (var coordinate of result) {
+                    point = new Point(parseInt(coordinate[0], 10), parseInt(coordinate[1], 10))
+                    totalPoints.push(point)
+                    ctx2.beginPath();
+                    ctx2.fillStyle = 'green';
+                    ctx2.arc(point.x, point.y, 10, 0, 2 * Math.PI);
+                    ctx2.fill();
+                }
+
+                // 畫線
+                ctx2.beginPath();
+                ctx2.moveTo(totalPoints[0].x, totalPoints[0].y)
+                for (var point of totalPoints) {
+                    ctx2.lineTo(point.x, point.y)
+                }
+                ctx2.strokeStyle = 'blue';
+                ctx2.closePath()
+                ctx2.stroke();
+            },
+            error: function (result) {
+                swal("初始化失敗，請重新整理", { button: "OK!" });
+            }
+        })
+    }
+
+    function draw_defaultRecangle() {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: "/read_action_config",
+            success: function (result) {
+                for (const rectangleInfo of result) {
+                    for (const [key, value] of Object.entries(rectangleInfo)) {
+                        if (typeof value == 'string') { // "zoneName": "Jig"
+                            text = value
+                        }
+                        else if (typeof value == 'object') { // "centerPoint": {"x": 529, "y": 122}
+                            switch (key) {
+                                case 'startPoint':
+                                    startPoint = new Point(value['x'], value['y']);
+                                    break;
+                                case 'endPoint':
+                                    endPoint = new Point(value['x'], value['y']);
+                                    break;
+                                case 'centerPoint':
+                                    centerPoint = new Point(value['x'], value['y']);
+                                    break;
+                            }
+                        }
+                    }
+                    recWidth = endPoint.x - startPoint.x
+                    recHeight = endPoint.y - startPoint.y
+                    rectangle = new Rectangle(text, startPoint, endPoint, centerPoint, recWidth, recHeight)
+                    rec.push(rectangle)
+                }
+                draw_fixRectangle()
+            },
+            error: function (result) {
+                swal("初始化失敗，請重新整理", { button: "OK!" });
+            }
+        })
+    }
+
+    function set_console() {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            url: "/read_console_config",
+            success: function (result) {
+                console = document.getElementById("console")
+                allContext = result.split('\n')
+                for (var i = 0; i < allContext.length - 1; i++) {
+                    console.innerHTML = console.innerHTML + allContext[i] + '</br>'
+                }
+            },
+            error: function (result) {
+                swal("初始化失敗，請重新整理", { button: "OK!" });
+            }
+        })
+    }
+
+    function padLeft(str, len) {
+        str = '' + str;
+        return str.length >= len ? str : new Array(len - str.length + 1).join("0") + str;
+}
+    // 寫入變動內容到console
+    function write_console(transformType) {
+
+        var today = new Date();
+        time = today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate() + ' ' + padLeft(today.getHours(), 2) + ':' + padLeft(today.getMinutes(), 2) + ':' + padLeft(today.getSeconds() ,2) + ' ';
+
+        console = document.getElementById("console")
+        switch (transformType) {
+            case 'actionStart':
+                console.innerHTML = console.innerHTML + time + consoleType.actionStart + '</br>';
+                break;
+            case 'handStart':
+                console.innerHTML = console.innerHTML + time + consoleType.handStart + '</br>';
+                break;
+            case 'actionOK':
+                console.innerHTML = console.innerHTML + time + consoleType.actionOK + '</br>';
+                break;
+            case 'handOK':
+                console.innerHTML = console.innerHTML + time + consoleType.handOK + '</br>';
+                break;
+        }
+
+        // 跳轉存四個作業區的值
+        var myObject = new Object();
+
+        consoleInfo = console.innerHTML.split('<br>')
+        myObject.console_config = consoleInfo
+        var myString = JSON.stringify(myObject);
+
+        $.ajax({
+            type: "POST",
+            url: $SCRIPT_ROOT + "/download_console",
+            data: myString,
+            success: function (data) {
+                swal("儲存成功", { button: "OK!" });
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                //alert(errorThrown);
+                swal("儲存失敗", { button: "OK!" });
+            }
+        });
+    }
+
+    ///// 動作標框 //////
+    function is_null() {
+        var sel = document.getElementById("form_list");
+        if (sel.options.length == 0) {
+            return true
+        }
+        return false
+    }
+    function start_action_label() {
+
+        write_console("actionStart")
+
+        rec.length = 0
+        zone = ["Placement", "Jig", "Work_Rack", "Finish"];
+        setup_form()
+        clear_form()
+        var canvas1 = document.getElementById("myCanvas1");
+        var ctx1 = canvas1.getContext("2d");
+        clear_rectangle(ctx1, canvas1.width, canvas1.height)
+        setup_image(ctx1, "/static/test.jpg")
+        canvas1.addEventListener('mousedown', start_darw, false);
+    }
+    function start_darw(e) {
+        if (is_null()) {
+            var canvas1 = document.getElementById("myCanvas1");
+            canvas1.removeEventListener("mousedown", start_darw, false);
+            canvas1.removeEventListener('mousemove', move, false);
+            canvas1.removeEventListener('mouseup', up, false);
+            return
+        }
+        clear_form()
+        draw_fixRectangle();
+        var canvas1 = document.getElementById("myCanvas1");
+        var ctx1 = canvas1.getContext("2d");
+        var canvasBox = canvas1.getBoundingClientRect();
+        startPoint = new Point(e.pageX - canvasBox.left, e.pageY - canvasBox.top);
+
+        canvas1.addEventListener('mousemove', move, false);
+        canvas1.addEventListener('mouseup', up, false);
+        f = true
+    }
+    function move(event) {
+        if (f) {
+            var canvas1 = document.getElementById("myCanvas1");
+            var ctx1 = canvas1.getContext("2d");
+            var canvasBox = canvas1.getBoundingClientRect();
+            clear_rectangle(ctx1, canvas1.width, canvas1.height)
+            setup_image(ctx1, "/static/test.jpg")
+            draw_fixRectangle()
+
+            // draw_tempRectangle()
+            ctx1.beginPath();
+            ctx1.lineWidth = "3";
+            ctx1.strokeStyle = "red";
+            ctx1.rect(startPoint.x, startPoint.y, event.pageX - canvasBox.left - startPoint.x, event.pageY - canvasBox.top - startPoint.y);
+            ctx1.stroke();
+        }
+    }
+    function up(event) {
+        f = false
+        var canvas1 = document.getElementById("myCanvas1");
+        var ctx1 = canvas1.getContext("2d");
+        var canvasBox = canvas1.getBoundingClientRect();
+        setup_image(ctx1, "/static/test.jpg")
+        endPoint = new Point(event.pageX - canvasBox.left, event.pageY - canvasBox.top)
+        centerPoint = new Point(Math.round((startPoint.x + endPoint.x) / 2), Math.round((startPoint.y + endPoint.y) / 2))
+        recWidth = endPoint.x - startPoint.x
+        recHeight = endPoint.y - startPoint.y
+
+        draw_fixRectangle()
+        var canvas1 = document.getElementById("myCanvas1");
+        var ctx1 = canvas1.getContext("2d");
+        ctx1.beginPath();
+        ctx1.lineWidth = "3";
+        ctx1.strokeStyle = "blue";
+        ctx1.rect(startPoint.x, startPoint.y, recWidth, recHeight);
+        ctx1.stroke();
+
+        const zoneSelect = document.querySelector(".form_position");
+        zoneSelect.style.left = startPoint.x + canvasBox.left + "px";
+        zoneSelect.style.top = event.pageY + "px";
+        zoneSelect.style.display = "initial";
+    }
+    function get_form_selection() {
+        clear_form()
+        var sel = document.getElementById("form_list");
+        var text = sel.options[sel.selectedIndex].text;
+        rectangle = new Rectangle(text, startPoint, endPoint, centerPoint, recWidth, recHeight)
+        rec.push(rectangle)
+        sel.remove(sel.selectedIndex);
+        draw_fixRectangle()
+    }
+
+    ///// 手部標框 //////
+    function start_hand_label() {
+
+        write_console("handStart")
+
+        totalPoints.length = 0
+
+        var canvas2 = document.getElementById("myCanvas2");
+        var ctx2 = canvas2.getContext("2d");
+
+        clear_rectangle(ctx2, canvas2.width, canvas2.height)
+        setup_image(ctx2, "/static/test1.jpg")
+
+        canvas2.addEventListener('click', draw_point, false);
+    }
+    function draw_point(e) {
+        var canvas2 = document.getElementById("myCanvas2");
+        var ctx2 = canvas2.getContext("2d");
+        var canvasBox = canvas2.getBoundingClientRect();
+        point = new Point(e.pageX - canvasBox.left, e.pageY - canvasBox.top)
+        totalPoints.push(point)
+
+        ctx2.beginPath();
+        ctx2.arc(point.x, point.y, 10, 0, 2 * Math.PI);
+        ctx2.fillStyle = 'green';
+        ctx2.fill();
+        ctx2.stroke();
+    }
+
+    function hand_OK() {
+
+        if (totalPoints.length != 4) {
+            swal("錯誤", "未標記四個點", "error", { button: "OK!" });
+        }
+        else {
+
+            write_console("handOK")
+
+            var canvas2 = document.getElementById("myCanvas2");
+            var ctx2 = canvas2.getContext("2d");
+            ctx2.beginPath();
+            ctx2.moveTo(totalPoints[0].x, totalPoints[0].y)
+            for (var i = 1; i < totalPoints.length; i++) {
+                ctx2.lineTo(totalPoints[i].x, totalPoints[i].y)
+            }
+            ctx2.strokeStyle = 'blue';
+            ctx2.closePath()
+            ctx2.stroke();
+
+            // 跳轉存四個點的值
+            var myObject = new Object();
+            point = []
+            for (var i = 0; i < totalPoints.length; i++) {
+                point.push(Math.round(totalPoints[i].x) + " " + Math.round(totalPoints[i].y));
+            }
+            myObject.hand_config = point
+            var myString = JSON.stringify(myObject);
+
+            $.ajax({
+                type: "POST",
+                url: $SCRIPT_ROOT + "/perspective_transformation"
+            });
+
+            window.setTimeout(function () {
+                img = document.getElementById('transformation')
+                img.src = '/perspective_transformation'
+            }, 10);
+
+            $.ajax({
+                type: "POST",
+                url: $SCRIPT_ROOT + "/hand_submit",
+                data: myString,
+                success: function (data) {
+                    swal("儲存成功", { button: "OK!" });
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    //alert(errorThrown);
+                    swal("儲存失敗", { button: "OK!" });
+                }
+            });
+        }
+    }
+
+    function action_OK() {
+
+        if (is_null()) {
+
+            write_console("actionOK")
+
+            // 跳轉存四個作業區的值
+            var myObject = new Object();
+            var rectangleInfo = []
+            for (var i = 0; i < rec.length; i++) {
+                rectangleInfo.push(rec[i].name + " " + Math.round(rec[i].startPoint.x) + " " + Math.round(rec[i].startPoint.y) + " " + Math.round(rec[i].endPoint.x) + " " + Math.round(rec[i].endPoint.y) + " " + Math.round(rec[i].centerPoint.x) + " " + Math.round(rec[i].centerPoint.y));
+            }
+            myObject.action_config = rectangleInfo
+            var myString = JSON.stringify(myObject);
+
+            $.ajax({
+                type: "POST",
+                url: $SCRIPT_ROOT + "/action_submit",
+                data: myString,
+                success: function (data) {
+                    swal("儲存成功", { button: "OK!" });
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    //alert(errorThrown);
+                    swal("儲存失敗", { button: "OK!" });
+                }
+            });
+        }
+        else {
+            swal("錯誤", "未標記四個作業區", "error", { button: "OK!" });
+        }
+    }
+
+</script>
+
+
+<head>
+    <meta charset="utf-8">
+    <title>子頁面</title>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+</head>
+
+<body>
+
+    <from>
+        <div class="form_position">
+            <select id="form_list"></select>
+            <input type="button" value="OK" onclick="get_form_selection()">
+        </div>
+    </from>
+
+    <!-- 返回主頁面 -->
+    <div>
+        <a href="/"><input type="button" value="Back" style="width:200px;height:60px;font-size:30px;"></a>
+    </div>
+
+    <div class='flex-container'>
+        <div class='component'>
+            <h1>動作流程偵測設定</h1>
+            <canvas id="myCanvas1"></canvas>
+            <img src="/static/test.jpg" id="imgs1" style="display:none"></img>
+            <!-- <img src="{{url_for('static', filename='test.jpg')}}" style="width:60%"> -->
+            <span>
+                <input type="button" value="Reset" style="width:200px;height:60px;font-size:40px;"
+                    onclick="start_action_label()">
+                <input type="button" value="Save" style="width:200px;height:60px;font-size:40px;" onclick="action_OK()">
+            </span>
+        </div>
+        <div class='component'>
+            <h1>手部觸碰偵測設定</h1>
+            <canvas id="myCanvas2"></canvas>
+            <img src="/static/test1.jpg" id="imgs2" style="display:none"></img>
+            <!-- <img src="{{url_for('static', filename='test.jpg')}}" style="width:60%"> -->
+            <span>
+                <input type="button" value="Reset" style="width:200px;height:60px;font-size:40px;"
+                    onclick="start_hand_label()">
+                <input type="button" value="Save" style="width:200px;height:60px;font-size:40px;" onclick="hand_OK()">
+            </span>
+        </div>
+        <div class='component'>
+            <h1>透視變換圖</h1>
+            <img src="/perspective_transformation" id=transformation>
+        </div>
+    </div>
+
+    <br>
+
+    <div style="overflow:scroll; overflow-X:hidden; border:2px red solid; width:60%; height:300px;">
+        <p id="console" style="font-size:30px;"></p>
+    </div>
+
+</body>
+
+</html>
