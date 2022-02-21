@@ -76,7 +76,6 @@ class Logger:
             cls.__logger.log(level, msgs, stacklevel=3)
         else:
             import inspect
-            # print(inspect.stack())
             stack = inspect.stack()[2]
             cls.__logger.log(level, msgs, extra={
                 'stack_filename': stack.filename,

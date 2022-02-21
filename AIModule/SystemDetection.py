@@ -118,7 +118,7 @@ class Motion:
     
         # 跑YOLO
         yoloResult = self.model.detect_motion(image)
-        print(yoloResult['label'])
+        print(f'yoloResult: {yoloResult}')
 
         isAnomalyStep, numOfCurrentStep = self.processDetection.run(yoloResult)
       

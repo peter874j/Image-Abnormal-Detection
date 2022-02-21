@@ -3,7 +3,7 @@ import threading
 import datetime, time
 from pathlib import Path
 import numpy as np
-import os
+from Config import Frame
 
 class Camera:
     def __init__(self,fps=30, video_source=1):
@@ -28,10 +28,10 @@ class Camera:
         while cap.isOpened() and self.isrunning:
             n += 1
             cap.grab()
-            if n == 4:  # read every 4th frame
+            if n == 1:  # read every 4th frame
                 (self.status, self.frame) = cap.retrieve()
                 n = 0
-            time.sleep(0.01)
+            time.sleep(0.05)
 
     def stop(self):
         # logger.debug("Stopping thread")
@@ -46,6 +46,19 @@ class Camera:
             with open("config/not_found.jpeg","rb") as f:
                 img = f.read()
             return img
+
+    #流程動作的camera函數
+    def get_motion_frame(self):
+        frame = self.get_frame()
+        frame = cv2.resize(frame, (1280, 720))
+        return frame
+
+	#透視變換的camera函數
+    def get_hands_frame(self):
+        frame = self.get_frame()
+        frame = cv2.resize(frame, (1280, 720))
+        frame = perspective_transform(frame, Frame.roiPts) #透視變換函數
+        return frame
 
 
 def perspective_transform(image, points):

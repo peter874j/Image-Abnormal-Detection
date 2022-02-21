@@ -1,9 +1,9 @@
 import cv2
-import numpy as np
 import datetime
+from PIL import Image
+import io
 
 from AIModule.ObjectUtils import BBox
-from Camera import perspective_transform
 
 class ConfigType:
 	action = "action_config"
@@ -50,44 +50,35 @@ class ServiceConfig:
 					result += content
 			return result
 
-class DrawingFrame:
+class Frame:
 
-	def __init__(self): 
-		#動作流程的初始
-		self.BBoxInfo = ServiceConfig.get_bbox_config()
-		# 手部的初始
-		self.roiPts = ServiceConfig.get_4_coordinate()
+	BBoxInfo = ServiceConfig.get_bbox_config() 
+	roiPts = ServiceConfig.get_4_coordinate() 
 
 	@staticmethod
-	def draw_rectangle(frame, zoneName, startPoint, endPoint):
-		cv2.rectangle(frame, (startPoint.x, startPoint.y), (endPoint.x, endPoint.y), (255, 0, 0), 3)
-		cv2.putText(frame, zoneName, (startPoint.x, startPoint.y), cv2.FONT_HERSHEY_DUPLEX, 2, (0, 255, 255), 3, cv2.LINE_AA)
-    
-	#流程動作的camera函數
-	def get_motion_frame(self, camera):
+	def initialize_label():
+		Frame.BBoxInfo = ServiceConfig.get_bbox_config() 
+		Frame.roiPts = ServiceConfig.get_4_coordinate() 
 
-		frame = camera.get_frame()
-		frame = cv2.resize(frame, (1280, 720))
+	@staticmethod
+	def draw_rectangle_in_zone(frame):
+		for BBox in Frame.BBoxInfo:
+			cv2.rectangle(frame, (BBox.startPoint.x, BBox.startPoint.y), (BBox.endPoint.x, BBox.endPoint.y), (255, 0, 0), 3)
+			cv2.putText(frame, BBox.zoneName, (BBox.startPoint.x, BBox.startPoint.y), cv2.FONT_HERSHEY_DUPLEX, 2, (0, 255, 255), 3, cv2.LINE_AA)
 
-		# AI MODEL
-		#畫圖
-		for BBox in self.BBoxInfo:
-			DrawingFrame.draw_rectangle(frame, BBox.zoneName, BBox.startPoint, BBox.endPoint)
+	@staticmethod
+	def transform_virtual_file(frame):
+		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+		frame = Image.fromarray(frame.astype('uint8'))
+		file_object = io.BytesIO()
+		frame.save(file_object, 'PNG')
+		file_object.seek(0)
+		return file_object
 
+	@staticmethod
+	def encode(frame):
+		frame = cv2.imencode('.png', frame)[1].tobytes()
+		frame = (b'--frame\r\n'b'Content-Type: image/png\r\n\r\n' + frame + b'\r\n')
 		return frame
-		#需要壓縮編碼成bite
-		# frame = cv2.imencode('.png', frame)[1].tobytes()
-		# return (b'--frame\r\n'b'Content-Type: image/png\r\n\r\n' + frame + b'\r\n')
 
-	#透視變換的camera函數
-	def get_hands_frame(self, camera):
-		
-		frame = camera.get_frame()
-		frame = cv2.resize(frame, (1280, 720))
 
-		# 前端(主頁面)的透視變換
-		frame = perspective_transform(frame, self.roiPts) #透視變換函數
-		return frame
-		#需要壓縮編碼成bite
-		# frame = cv2.imencode('.png', frame)[1].tobytes()
-		# yield (b'--frame\r\n'b'Content-Type: image/png\r\n\r\n' + frame + b'\r\n')
