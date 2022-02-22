@@ -9,13 +9,20 @@ class ConfigType:
 	action = "action_config"
 	hand = "hand_config"
 	console = "console_config"
+	mainPage_console = "mainPage_console_config"
+
 
 class ServiceConfig:
-
 	@staticmethod
 	def write_config(data, type):
-		with open('config/{}.txt'.format(type), 'w') as f:
-			f.write('\n'.join(data[type]))
+		# 處理hand、motion txt
+		if isinstance(data, list):
+			with open('config/{}.txt'.format(type), 'w') as f:
+				f.write(('\n').join(data)) 
+		else:
+			# 處理console txt
+			with open('config/{}.txt'.format(type), 'a') as f:
+				f.write(data+'\n') 
 
 	#動作流程座標框
 	@staticmethod
@@ -39,8 +46,8 @@ class ServiceConfig:
 
 	#獲得console內容
 	@staticmethod
-	def get_console_config():
-		with open('config/{}.txt'.format(ConfigType.console), 'r') as f:
+	def get_console_config(type):
+		with open('config/{}.txt'.format(type), 'r') as f:
 			result = ''
 			contents = f.readlines()       #讀取全部行
 			for content in contents:       #顯示一行	

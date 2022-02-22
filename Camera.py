@@ -17,11 +17,9 @@ class Camera:
         # logger.debug("Starting thread")
         # logger.info("Thread started")
 
-
     def run(self):
         self.thread = threading.Thread(target=self.update, args=([self.cap]), daemon=True)
         self.thread.start()
-
 
     def update(self, cap):
         n = 0
@@ -40,26 +38,12 @@ class Camera:
     def get_frame(self):
         ### Camera有讀到影像
         if self.status:
-            return self.frame
+            return cv2.resize(self.frame, (1280, 720))
         ### Camera讀不到影像，讀預設not_found影像
         else:
             with open("config/not_found.jpeg","rb") as f:
                 img = f.read()
             return img
-
-    #流程動作的camera函數
-    def get_motion_frame(self):
-        frame = self.get_frame()
-        frame = cv2.resize(frame, (1280, 720))
-        return frame
-
-	#透視變換的camera函數
-    def get_hands_frame(self):
-        frame = self.get_frame()
-        frame = cv2.resize(frame, (1280, 720))
-        frame = perspective_transform(frame, Frame.roiPts) #透視變換函數
-        return frame
-
 
 def perspective_transform(image, points):
     """perspective transform ROI regison

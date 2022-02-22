@@ -1,0 +1,4 @@
+2022/2/22 15:00:54 Step3 is Abnormal Motion!
+2022/2/22 15:01:08 Step3 is Abnormal Motion!
+2022/2/22 15:01:15 Step1 is Abnormal Motion!
+2022/2/22 15:01:22 Step3 is Abnormal Motion!

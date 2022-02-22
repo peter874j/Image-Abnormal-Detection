@@ -48,6 +48,7 @@
     var recHeight;
     var totalPoints = [];
     var motionImg;
+    var handImg;
 
     class consoleType {
         static actionStart = "Motion Label Setting Reset Successfully!"
@@ -122,6 +123,7 @@
         var ctx2 = canvas2.getContext("2d");
 
         motionImg = document.getElementById('imgs1')
+        handImg = document.getElementById('imgs2')
         w = motionImg.width
         h = motionImg.height
         canvas1.width = w
@@ -132,8 +134,7 @@
         ctx1.drawImage(motionImg, 0, 0, w, h);
         draw_defaultRecangle();
 
-        var bgImg2 = document.getElementById('imgs2')
-        ctx2.drawImage(bgImg2, 0, 0, w, h);
+        ctx2.drawImage(handImg, 0, 0, w, h);
         draw_defaultPoint();
 
         setup_form()
@@ -219,6 +220,7 @@
             type: "POST",
             dataType: "json",
             url: "/read_console_config",
+            data: JSON.stringify("console_config"),
             success: function (result) {
                 console = document.getElementById("console")
                 allContext = result.split('\n')
@@ -235,12 +237,12 @@
     function padLeft(str, len) {
         str = '' + str;
         return str.length >= len ? str : new Array(len - str.length + 1).join("0") + str;
-}
+    }
     // 寫入變動內容到console
     function write_console(transformType) {
 
         var today = new Date();
-        time = today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate() + ' ' + padLeft(today.getHours(), 2) + ':' + padLeft(today.getMinutes(), 2) + ':' + padLeft(today.getSeconds() ,2) + ' ';
+        time = today.getFullYear() + '/' + (today.getMonth() + 1) + '/' + today.getDate() + ' ' + padLeft(today.getHours(), 2) + ':' + padLeft(today.getMinutes(), 2) + ':' + padLeft(today.getSeconds(), 2) + ' ';
 
         console = document.getElementById("console")
         switch (transformType) {
@@ -259,16 +261,11 @@
         }
 
         // 跳轉存四個作業區的值
-        var myObject = new Object();
-
-        consoleInfo = console.innerHTML.split('<br>')
-        myObject.console_config = consoleInfo
-        var myString = JSON.stringify(myObject);
-
+        consoleContent = time + consoleType.handOK
         $.ajax({
             type: "POST",
             url: $SCRIPT_ROOT + "/download_console",
-            data: myString,
+            data: JSON.stringify({ "text": consoleContent, "consoleType": 'console_config' }),
             success: function (data) {
                 swal("儲存成功", { button: "OK!" });
             },
@@ -383,7 +380,7 @@
         var ctx2 = canvas2.getContext("2d");
 
         clear_rectangle(ctx2, canvas2.width, canvas2.height)
-        setup_image(ctx2, "/static/test1.jpg")
+        setup_image(ctx2, handImg)
 
         canvas2.addEventListener('click', draw_point, false);
     }
@@ -427,7 +424,7 @@
             for (var i = 0; i < totalPoints.length; i++) {
                 point.push(Math.round(totalPoints[i].x) + " " + Math.round(totalPoints[i].y));
             }
-            myObject.hand_config = point
+            myObject = point
             var myString = JSON.stringify(myObject);
 
             $.ajax({
@@ -467,7 +464,7 @@
             for (var i = 0; i < rec.length; i++) {
                 rectangleInfo.push(rec[i].name + " " + Math.round(rec[i].startPoint.x) + " " + Math.round(rec[i].startPoint.y) + " " + Math.round(rec[i].endPoint.x) + " " + Math.round(rec[i].endPoint.y) + " " + Math.round(rec[i].centerPoint.x) + " " + Math.round(rec[i].centerPoint.y));
             }
-            myObject.action_config = rectangleInfo
+            myObject = rectangleInfo
             var myString = JSON.stringify(myObject);
 
             $.ajax({
@@ -516,7 +513,7 @@
         <div class='component'>
             <h1>動作流程偵測設定</h1>
             <canvas id="myCanvas1"></canvas>
-            <img src="/currentFrame" id="imgs1" style="display:none"></img>
+            <img src="/currentMotionFrame" id="imgs1" style="display:none"></img>
             <span>
                 <input type="button" value="Reset" style="width:200px;height:60px;font-size:40px;"
                     onclick="start_action_label()">
@@ -526,7 +523,7 @@
         <div class='component'>
             <h1>手部觸碰偵測設定</h1>
             <canvas id="myCanvas2"></canvas>
-            <img src="/static/test1.jpg" id="imgs2" style="display:none"></img>
+            <img src="/currentHandFrame" id="imgs2" style="display:none"></img>
             <!-- <img src="{{url_for('static', filename='test.jpg')}}" style="width:60%"> -->
             <span>
                 <input type="button" value="Reset" style="width:200px;height:60px;font-size:40px;"

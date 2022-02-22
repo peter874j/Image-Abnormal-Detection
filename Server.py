@@ -27,7 +27,8 @@ Logger.config(
 app = Flask(__name__)
 
 def InitGlbVar():
-    global currentMotionFrame
+    global MotionFrame
+    global HandFrame
 
 ### 主頁面進入點
 @app.route("/", methods=['GET'])
@@ -61,9 +62,9 @@ def system_time_info():
 ### 回傳動作流程camera的frame
 @app.route("/video_feed_0")
 def video_feed_0():
-	global currentMotionFrame
-	currentMotionFrame = camera0.get_motion_frame()
-	frame = copy.deepcopy(currentMotionFrame)
+	global MotionFrame
+	MotionFrame = camera0.get_frame()
+	frame = copy.deepcopy(MotionFrame)
 	Frame.draw_rectangle_in_zone(frame) # 畫作業區框框
 	frame = Frame.encode(frame)
 	return Response(frame, mimetype="multipart/x-mixed-replace; boundary=frame")
@@ -71,18 +72,30 @@ def video_feed_0():
 ### 第1個camera的串流含式(手部)
 @app.route("/video_feed_1")
 def video_feed_1():
-    frame = camera1.get_hands_frame()
+    global HandFrame
+    HandFrame = camera1.get_frame()
+    frame = perspective_transform(HandFrame, Frame.roiPts) #透視變換函數
     frame = handsDetection.run(frame)
     frame = Frame.encode(frame)
     return Response(frame, mimetype="multipart/x-mixed-replace; boundary=frame")
 
+############################################################
 ### 跳子頁面要傳當前圖片
-@app.route("/currentFrame", methods=['GET'])
-def get_currentFrame():
-	global currentMotionFrame
-	frame = copy.deepcopy(currentMotionFrame)
+@app.route("/currentMotionFrame", methods=['GET'])
+def get_currentMotionFrame():
+	global MotionFrame
+	frame = copy.deepcopy(MotionFrame)
 	file_object = Frame.transform_virtual_file(frame)
 	return send_file(file_object, mimetype='image/PNG')
+
+@app.route("/currentHandFrame", methods=['GET'])
+def get_currentHandFrame():
+	global HandFrame
+	frame = copy.deepcopy(HandFrame)
+	file_object = Frame.transform_virtual_file(frame)
+	return send_file(file_object, mimetype='image/PNG')
+############################################################
+
 ### 前端(子頁面)的透視變換
 @app.route("/perspective_transformation", methods=['GET', 'POST'])
 def perspective_transformation():
@@ -97,7 +110,7 @@ def perspective_transformation():
 @app.route("/motion_result", methods=['POST'])
 def motion_result():
     if request.method == "POST":
-        isAnomalyStep, numOfCurrentStep = motionDetection.run(currentMotionFrame)
+        isAnomalyStep, numOfCurrentStep = motionDetection.run(MotionFrame)
         return json.dumps({'step_result':isAnomalyStep, 'step_num':numOfCurrentStep})
 
 ### 作業區矩形座標寫入txt
@@ -125,19 +138,17 @@ def hand_submit():
 def download_console():
     if request.method == "POST":
         data = request.get_json(force=True)
-        ServiceConfig.write_config(data, ConfigType.console)
+        ServiceConfig.write_config(data['text'], data['consoleType'])    
         return "OK"
     else:
-        return "OK"
+        return "OK" 
 
-### (子頁面)console讀取consoleInf.txt
+### (主、子頁面)console讀取console_config.txt
 @app.route("/read_console_config", methods=['POST'])
 def read_consoleInfo():
-    if request.method == "POST":
-        data = ServiceConfig.get_console_config()
-        return json.dumps(data)
-    else:
-        return "OK"
+    consoleType = request.get_json(force=True)
+    data = ServiceConfig.get_console_config(consoleType)
+    return json.dumps(data) 
 
 ### (子頁面)讀取action_config.txt 資料傳到前端
 @app.route("/read_action_config", methods=['POST'])

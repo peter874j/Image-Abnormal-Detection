@@ -1,6 +1,37 @@
-2022/2/18 17:58:47 Motion Label Setting Reset Successfully!
-2022/2/18 17:58:47 Motion Label Setting Reset Successfully!
-2022/2/18 17:58:47 Motion Label Setting Reset Successfully!
-2022/2/18 17:58:48 Motion Label Setting Reset Successfully!
-2022/2/18 18:32:03 Motion Label Setting Reset Successfully!
-2022/2/18 18:32:45 Motion Label Setting Save Successfully!
+2022/2/21 16:21:38 Motion Label Setting Save Successfully!
+2022/2/21 17:02:35 Hands View Calibration Setting Save Successfully!
+2022/2/22 09:36:54 Hands View Calibration Setting Save Successfully!
+2022/2/22 09:37:07 Hands View Calibration Setting Save Successfully!
+2022/2/22 09:37:31 Hands View Calibration Setting Save Successfully!
+2022/2/22 09:37:42 Hands View Calibration Setting Save Successfully!
+2022/2/22 09:41:55 Hands View Calibration Setting Save Successfully!
+2022/2/22 09:42:08 Hands View Calibration Setting Save Successfully!
+2022/2/22 13:41:00 Hands View Calibration Setting Save Successfully!
+2022/2/22 13:41:02 Hands View Calibration Setting Save Successfully!
+2022/2/22 13:41:16 Hands View Calibration Setting Save Successfully!
+2022/2/22 13:41:18 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:13:33 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:13:35 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:16:09 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:16:15 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:16:21 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:16:24 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:22:27 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:22:34 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:25:37 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:25:42 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:28:20 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:28:24 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:39:57 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:40:01 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:40:04 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:40:07 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:40:09 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:48:53 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:48:58 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:53:04 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:53:08 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:56:41 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:56:45 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:57:36 Hands View Calibration Setting Save Successfully!
+2022/2/22 14:57:52 Hands View Calibration Setting Save Successfully!

@@ -8,9 +8,10 @@ sys.path.append('./AIModule')
 from utils.plots import plot_fail_touch
 import numpy as np
 import math
-from ObjectUtils import Zone, Label, Step
-
 from collections import deque
+from ObjectUtils import Zone, Label, Step
+from Config import ServiceConfig
+
 
 def write_video(outVideo, q):
     for frame in q:
@@ -118,7 +119,6 @@ class Motion:
     
         # 跑YOLO
         yoloResult = self.model.detect_motion(image)
-        print(f'yoloResult: {yoloResult}')
 
         isAnomalyStep, numOfCurrentStep = self.processDetection.run(yoloResult)
       
@@ -249,7 +249,6 @@ class Motion:
                 # self.gui.show_currentStep_is_correct(numOfCurrentStep)
                 # return isAnomalyStep, numOfCurrentStep
 
-
         # 目前步驟錯誤
         if isAnomalyStep == "YES":
             # thread = Thread(target=self.__tool.play_sound())
@@ -257,10 +256,8 @@ class Motion:
             self.haveAlarm = True
             return [isAnomalyStep], [numOfCurrentStep]
 
-
         if isAnomalyStep == 'NONE':
             return [isAnomalyStep], [self.processDetection.currentStep.number]
-
 
     class __tool:
         @staticmethod
@@ -299,6 +296,10 @@ class Hands:
         if self.NGFlag == None:
             self.lastNGImg = np.full(shape=streamImg.shape, fill_value=[255, 255, 187], dtype=np.uint8)     
             cv2.putText(self.lastNGImg, "Historical Abnormal Record", (int(0.5 * streamImg.shape[0] - 120), int(0.5 * streamImg.shape[1] - 20)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 0, 0), 2)
+       
+        ### last  NG Img resize
+        if self.lastNGImg.shape != streamImg.shape:
+            self.lastNGImg = cv2.resize(self.lastNGImg, (streamImg.shape[1], streamImg.shape[0]), interpolation=cv2.INTER_AREA)
 
         ### draw system time on image
         dateFormat = "%Y/%m/%d %H:%M:%S"
@@ -313,9 +314,15 @@ class Hands:
         # cv2.rectangle(streamImg, (yoloResult['PCB'][0] + pixelThres, yoloResult['PCB'][1] + pixelThres), (yoloResult['PCB'][2] - pixelThres, yoloResult['PCB'][3] - pixelThres), [0, 0, 255], 1, cv2.LINE_AA)  # no filled
         ### Record NG Image
         if self.NGFlag and centerFlag:
+            dateFormat = "%Y/%m/%d %H:%M:%S"
+            dateText = datetime.now().strftime(dateFormat)
+            content = '{} Hand Alarm!'.format(dateText)
+            ServiceConfig.write_config(content,"mainPage_console_config")
             self.lastNGImg = streamImg
             plot_fail_touch(streamImg, yoloResult['PCB'], self.pixelThres, color=None, line_thickness=3)
-
+        
+        self.NGFlag = False   # RESET 
+        
         # Concatenate Stream & History Abnomal Image
         resultsImg = np.hstack((streamImg, self.lastNGImg))
         return resultsImg

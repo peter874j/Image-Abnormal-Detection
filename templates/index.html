@@ -1,79 +1,77 @@
-
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset="utf-8">
-    <title>友達測試網站</title>
+	<meta charset="utf-8">
+	<title>AUO Vision Guard</title>
 	<link rel="stylesheet" href="static/icon/iconfont.css">
 	<script src="static/js/jquery.min.js"></script>
 	<script src="static/js/echarts.min.js"></script>
-
-
-
 </head>
-<body>
-<div class="container-header">
-    <ul class="nowTime">
-        <li></li>
-        <li></li>
-    </ul>
-    <h3>景碩平台</h3>
-</div>
-<div class="container-content">
-    <div class="top">
-		<div class="count-base" >
-			<div class="com-count-title">
-				<a class="button" href="/sec_page">Configure</a>
-			</div>
-		</div>
-		<div class="count-resource">
-		</div>	
-    </div>
 
-	<div class="mid">
-		<div class="count-video_md " >
-			<div class="com-count-title">動作流程偵測</div>
-			<div class="com-screen-content">
-				<img id="cameraFeed" src="{{ url_for('video_feed_0') }}" width="90%" height="90%">
-			</div>
-			<span class="left-top"></span>
-			<span class="right-top"></span>
-			<span class="left-bottom"></span>
-			<span class="right-bottom"></span>
-		</div>
-		<div class="count-event" >
-			<div class="com-count-title">動作流程狀態</div>
-			<div class="com-screen-content">
-				<!-- <img id="cameraFeed1" src="{{ url_for('video_feed_1') }}" width="90%" height="90%"> -->
-				<p id="start" style="font-size:50px;" class="start_and_end">Start</p>
-				<p id="Step_result1" style="font-size:50px;">Step 1. Work_Rack to Jig</p>
-				<p id="Step_result2" style="font-size:50px;">Step 2. Jig to Finish</p>
-				<p id="Step_result3" style="font-size:50px;">Step 3. Placement to Jig</p>
-				<p id="Step_result4" style="font-size:50px;">Step 4. Jig to Work_Rack</p>
-				<p id="end" style="font-size:50px;" class="start_and_end">End</p>
-			</div>
-			<span class="left-top"></span>
-			<span class="right-top"></span>
-			<span class="left-bottom"></span>
-			<span class="right-bottom"></span>
-		</div>
-		<div class="count-video_hd" >
-			<div class="com-count-title">手部異常偵測</div>
-			<div class="com-screen-content">
-				<img id="cameraHands" src="{{ url_for('video_feed_1') }}" width="90%" height="90%">
-			</div>
-			<span class="left-top"></span>
-			<span class="right-top"></span>
-			<span class="left-bottom"></span>
-			<span class="right-bottom"></span>
-		</div>
+<body>
+	<div class="container-header">
+		<ul class="nowTime">
+			<li></li>
+			<li></li>
+		</ul>
+		<h3>影像異常監控平台</h3>
 	</div>
-	
-	<div class="bottom">
-	</div>
-	<div class="count-console" >
-		<div class="com-count-title">Console</div>
-		<div class="com-screen-content">
+	<div class="container-content">
+		<div class="top">
+			<div class="count-base">
+				<div class="com-count-title">
+					<a class="button" href="/sec_page">Configure</a>
+				</div>
+			</div>
+			<div class="count-resource">
+			</div>
+		</div>
+
+		<div class="mid">
+			<div class="count-video_md ">
+				<div class="com-count-title">動作流程偵測</div>
+				<div class="com-screen-content">
+					<img id="cameraFeed" src="{{ url_for('video_feed_0') }}" width="90%" height="90%">
+				</div>
+				<span class="left-top"></span>
+				<span class="right-top"></span>
+				<span class="left-bottom"></span>
+				<span class="right-bottom"></span>
+			</div>
+			<div class="count-event">
+				<div class="com-count-title">動作流程狀態</div>
+				<div class="com-screen-content">
+					<!-- <img id="cameraFeed1" src="{{ url_for('video_feed_1') }}" width="90%" height="90%"> -->
+					<p id="start" style="font-size:50px;color:white;" class="start_and_end">Start</p>
+					<p id="Step_result1" style="font-size:50px;color:white;">Step 1. Work_Rack to Jig</p>
+					<p id="Step_result2" style="font-size:50px;color:white;">Step 2. Jig to Finish</p>
+					<p id="Step_result3" style="font-size:50px;color:white;">Step 3. Placement to Jig</p>
+					<p id="Step_result4" style="font-size:50px;color:white;">Step 4. Jig to Work_Rack</p>
+					<p id="end" style="font-size:50px;color:white;" class="start_and_end">End</p>
+				</div>
+				<span class="left-top"></span>
+				<span class="right-top"></span>
+				<span class="left-bottom"></span>
+				<span class="right-bottom"></span>
+			</div>
+			<div class="count-video_hd">
+				<div class="com-count-title">手部異常偵測</div>
+				<div class="com-screen-content">
+					<img id="cameraHands" src="{{ url_for('video_feed_1') }}" width="90%" height="90%">
+				</div>
+				<span class="left-top"></span>
+				<span class="right-top"></span>
+				<span class="left-bottom"></span>
+				<span class="right-bottom"></span>
+			</div>
+		</div>
+
+		<div class="bottom">
+		</div>
+		<div class="count-console">
+			<div class="com-count-title">Console</div>
+			<div class="com-screen-content">
 				<div class="topRec_List">
 					<dl>
 						<dd>日期</dd>
@@ -81,123 +79,167 @@
 						<dd>違規狀況</dd>
 					</dl>
 					<div class="maquee">
-						<ul>											
-							<p id="console" style="font-size:30px;"></p>
+						<ul>
+							<p id="console" style="font-size:30px;">
+								<!-- <li>
+									<div> 123 </div>
+									<div> 123 </div>
+									<div> 123 </div>
+								</li> -->
+							</p>
 						</ul>
 					</div>
 				</div>
+			</div>
+			<span class="left-top"></span>
+			<span class="right-top"></span>
+			<span class="left-bottom"></span>
+			<span class="right-bottom"></span>
 		</div>
-		<span class="left-top"></span>
-		<span class="right-top"></span>
-		<span class="left-bottom"></span>
-		<span class="right-bottom"></span>
+		<div class="clearfix"></div>
 	</div>
-	<div class="clearfix"></div>
-</div>
 
-<script type="text/javascript"> 
-//根据不同的分辨率调用不同的css和js
-	document.write("<link href='static/css/test-1920.css' rel='stylesheet' type='text/css'>");  		
-	document.writeln("<script type=\"text/javascript\" src=\"static/js/test-1920.js\"><\/script>");
-</script>
-<!--console浮動-->
-<script type="text/javascript"> 
-	function autoScroll(obj){  
-		$(obj).find("ul").animate({  
-			marginTop : "-39px"  
-		},500,function(){  
-			$(this).css({marginTop : "0px"}).find("li:first").appendTo(this);  
-		})  
-	}
-	$(function(){  
-		setInterval('autoScroll(".maquee")',2000);
-	}) 
-    function motion_result() {
-        $.ajax({
-            type: "POST",
-            dataType: "json",
-            url: "/motion_result",
-            success: function (result) {
-                for (var i = 0; i < result['step_num'].length; i++) {
-                    if (result['step_result'][i] == "NO") {
-                        var stepConsole = document.getElementById(`Step_result${result['step_num'][i]}`);
-                        stepConsole.style = "color:green;font-size:50px;"
-                    }
-                    if (result['step_result'][i] == "YES") {
-                        var stepConsole = document.getElementById(`Step_result${result['step_num'][i]}`);
-                        stepConsole.style = "color:red;font-size:50px;"
-                    }
+	<script type=text/javascript>
+		var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+	</script>
+	<script type="text/javascript">
+		//根据不同的分辨率调用不同的css和js
+		document.write("<link href='static/css/test-1920.css' rel='stylesheet' type='text/css'>");
+		document.writeln("<script type=\"text/javascript\" src=\"static/js/test-1920.js\"><\/script>");
+	</script>
+	<!--console浮動-->
+	<script type="text/javascript">
 
-                    if (result['step_num'] == '0') {
-                        var stepEnd = document.getElementById('end');
-                        stepEnd.style.display = "none"
-                    }
-                    if (result['step_num'] == '1') {
-                        var stepStart = document.getElementById('start');
-                        stepStart.style.display = "block"
-                    }
-                    if (result['step_num'] == '4') {
-                        for (var i = 1; i <= 4; i++) {
-                            var stepConsole = document.getElementById(`Step_result${i}`);
-                            stepConsole.style = "color:#FFFFFF;font-size:50px;"
-                        }
-                        var stepEnd = document.getElementById('end');
-                        stepEnd.style.display = "block"
-                        var stepStart = document.getElementById('start');
-                        stepStart.style.display = "none"
-                    }
-                }
-            },
-            error: function (result) {
-                swal("Error", { button: "OK!" });
-            }
-        })
-    }
-
-	function set_console() {
-		$.ajax({
-			type: "POST",
-			dataType: "json",
-			url: "/read_console_config",
-			success: function (result) {
-				console = document.getElementById("console")
-				allContext = result.split('\n')
-				for (var i = 0; i < allContext.length - 1; i++) {
-					consoleDate = allContext[i].split(' ')[0]
-					consoleTime = allContext[i].split(' ')[1]
-					consoleEvent = allContext[i].replace(consoleDate, "")
-					consoleEvent = consoleEvent.replace(consoleTime, "")					
-					console.innerHTML = console.innerHTML + '<li>' + '<div>' + consoleDate + '</div>' + '<div>' + consoleTime+ '</div>' + '<div>' + consoleEvent+ '</div>' + '</li>'
+		window.onload = function () {
+			set_console();
+		};
+		function set_console() {
+			$.ajax({
+				type: "POST",
+				dataType: "json",
+				url: "/read_console_config",
+				data: JSON.stringify("mainPage_console_config"),
+				success: function (result) {
+					consoleID = document.getElementById("console")
+					allContent = result.split('\n')
+					for (var i = 0; i < allContent.length - 1; i++) {
+						consoleDate = allContent[i].split(' ')[0]
+						consoleTime = allContent[i].split(' ')[1]
+						consoleEvent = allContent[i].replace(consoleDate, "")
+						consoleEvent = consoleEvent.replace(consoleTime, "")
+						consoleID.innerHTML = consoleID.innerHTML + '<li>' + '<div>' + consoleDate + '</div>' + '<div>' + consoleTime + '</div>' + '<div>' + consoleEvent + '</div>' + '</li>'
+					}
+				},
+				error: function (result) {
+					console.log("初始化失敗，請重新整理 123")
 				}
-			}
+			})
+		}
+
+		function autoScroll(obj) {
+			$(obj).find("ul").animate({
+				marginTop: "-39px"
+			}, 500, function () {
+				$(this).css({ marginTop: "0px" }).find("li:first").appendTo(this);
+			})
+		}
+		$(function () {
+			setInterval('autoScroll(".maquee")', 2000);
 		})
-    }
 
-	$(function(){  
-	setInterval(set_console());
-		})
+		function padLeft(str, len) {
+			str = '' + str;
+			return str.length >= len ? str : new Array(len - str.length + 1).join("0") + str;
+		}
 
-    // for motions
-    window.setInterval(function () {
-        var myImageElement = document.getElementById('cameraFeed');
-        var timestamp = new Date().getTime()
-        var newUrl = "{{ url_for('video_feed_0') }}" + '?_=' + timestamp;
-        myImageElement.src = newUrl;
-        motion_result()
-    }, 150);
+		// alarm 寫入 abnormal_config.txt
+		function write_console(stepNum) {
+			var timestamp = new Date();
+			consoleDate = timestamp.getFullYear() + '/' + (timestamp.getMonth() + 1) + '/' + timestamp.getDate()
+			consoleTime = padLeft(timestamp.getHours(), 2) + ':' + padLeft(timestamp.getMinutes(), 2) + ':' + padLeft(timestamp.getSeconds(), 2)
+			consoleEvent = "Step" + stepNum + " is Abnormal Motion!";
+			consoleID = document.getElementById("console")
+			consoleID.innerHTML = consoleID.innerHTML + '<li>' + '<div>' + consoleDate + '</div>' + '<div>' + consoleTime + '</div>' + '<div>' + consoleEvent + '</div>' + '</li>'
 
-    // // for hands
-    window.setInterval(function () {
-        var myImageElement = document.getElementById('cameraHands');
-        var timestamp = new Date().getTime()
-        var newUrl = "{{ url_for('video_feed_1') }}" + '?_=' + timestamp;
-        myImageElement.src = newUrl;
-    }, 100);
+			consoleContent = consoleDate + " " + consoleTime + " " + consoleEvent  //要寫入txt的內容
+			$.ajax({
+				type: "POST",
+				url: $SCRIPT_ROOT + "/download_console",
+				data: JSON.stringify({ "text": consoleContent, "consoleType": 'mainPage_console_config' }),
+				success: function (data) {
+					// log
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					// log
+				}
+			});
+		}
 
-    window.setInterval(function () { // load the data from your endpoint into the div
-        $("#now_time").load("/now_time.txt")
-    }, 1000)
+		// 顯示動作檢測及果
+		function motion_result() {
+			$.ajax({
+				type: "POST",
+				dataType: "json",
+				url: "/motion_result",
+				success: function (result) {
+					for (var i = 0; i < result['step_num'].length; i++) {
+						if (result['step_result'][i] == "NO") {
+							var stepConsole = document.getElementById(`Step_result${result['step_num'][i]}`);
+							stepConsole.style = "color:green;font-size:50px;"
+						}
+						if (result['step_result'][i] == "YES") {
+							var stepConsole = document.getElementById(`Step_result${result['step_num'][i]}`);
+							stepConsole.style = "color:red;font-size:50px;"
+							write_console(result['step_num'][i]);
+						}
 
-</script>
+						if (result['step_num'] == '0') {
+							var stepEnd = document.getElementById('end');
+							stepEnd.style.display = "none"
+						}
+						if (result['step_num'] == '1') {
+							var stepStart = document.getElementById('start');
+							stepStart.style.display = "block"
+						}
+						if (result['step_num'] == '4') {
+							for (var i = 1; i <= 4; i++) {
+								var stepConsole = document.getElementById(`Step_result${i}`);
+								stepConsole.style = "font-size:50px;color:white;"
+							}
+							var stepEnd = document.getElementById('end');
+							stepEnd.style.display = "block"
+							var stepStart = document.getElementById('start');
+							stepStart.style.display = "none"
+						}
+					}
+				},
+				error: function (result) {
+					swal("Error", { button: "OK!" });
+				}
+			})
+		}
+
+		// for motions
+		window.setInterval(function () {
+			var myImageElement = document.getElementById('cameraFeed');
+			var newUrl = "{{ url_for('video_feed_0') }}" + '?_=' + new Date().getTime();
+			myImageElement.src = newUrl;
+			motion_result()
+		}, 150);
+
+		// // for hands
+		window.setInterval(function () {
+			var myImageElement = document.getElementById('cameraHands');
+			var newUrl = "{{ url_for('video_feed_1') }}" + '?_=' + new Date().getTime();
+			myImageElement.src = newUrl;
+		}, 100);
+
+		window.setInterval(function () { // load the data from your endpoint into the div
+			$("#now_time").load("/now_time.txt")
+			set_console();
+		}, 1000)
+
+	</script>
 </body>
+
 </html>
